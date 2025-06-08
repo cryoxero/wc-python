@@ -1,6 +1,23 @@
 from argparse import ArgumentParser
 from os.path import exists, isdir, getsize
 from sys import stdin
+from enum import Enum
+
+class States(Enum):
+    BYTES = 1
+    CHARS = 2
+    LINES = 4
+    WORDS = 8
+
+def get_state(args):
+    state = 0
+    
+    state |= int(args.lines) * States.LINES.value
+    state |= int(args.words) * States.WORDS.value
+    state |= int(args.bytes) * States.BYTES.value
+    state |= int(args.chars) * States.CHARS.value
+    
+    return state or States.LINES.value | States.WORDS.value | States.BYTES.value
 
 def get_file_details(path):
     details = {
@@ -90,6 +107,7 @@ def main():
     parser.add_argument("-l", "--lines", action="store_true", help="print the newline counts")
     parser.add_argument("-w", "--words", action="store_true", help="print the word counts")
     args = parser.parse_args()
+    print(get_state(args))
     quit(0)
 
 if __name__ == "__main__":
