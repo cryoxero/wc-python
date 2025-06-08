@@ -9,6 +9,7 @@ class States(Enum):
     LINES = 4
     WORDS = 8
 
+
 def get_state(args):
     state = 0
     
@@ -18,6 +19,7 @@ def get_state(args):
     state |= int(args.chars) * States.CHARS.value
     
     return state or States.LINES.value | States.WORDS.value | States.BYTES.value
+
 
 def get_file_details(path):
     details = {
@@ -100,6 +102,18 @@ def get_stdin_details():
     return details
 
 
+def report(state, details, path=""):
+    if state & States.LINES.value:
+        print(f'{details["lines"]:3}', end="\t")
+    if state & States.WORDS.value:
+        print(f'{details["words"]:3}', end="\t")
+    if state & States.BYTES.value:
+        print(f'{details["bytes"]:3}', end="\t")
+    if state & States.CHARS.value:
+        print(f'{details["chars"]:3}', end="\t")
+    print(path)
+
+
 def main():
     parser = ArgumentParser("wc-python", description="A version of GNU/linux wc tool, written in python by CryoXero")
     parser.add_argument("-c", "--bytes", action="store_true", help="print the byte counts")
@@ -107,7 +121,7 @@ def main():
     parser.add_argument("-l", "--lines", action="store_true", help="print the newline counts")
     parser.add_argument("-w", "--words", action="store_true", help="print the word counts")
     args = parser.parse_args()
-    print(get_state(args))
+    state = get_state(args)
     quit(0)
 
 if __name__ == "__main__":
