@@ -116,7 +116,8 @@ def get_stdin_details():
 
         if line_length > details["longest"]:
             details["longest"] = line_length
-    
+    except KeyboardInterrupt:
+        return details
     except Exception:
         details["error"] = True
 
@@ -144,10 +145,32 @@ def main():
     parser.add_argument("-l", "--lines", action="store_true", help="print the newline counts")
     parser.add_argument("-w", "--words", action="store_true", help="print the word counts")
     parser.add_argument("-L", "--max-line-length", action="store_true", help="print the maximum display width")
+    parser.add_argument("FILE", type=str, nargs="*", help="With no FILE, or when FILE is -, read standard input.")
     args = parser.parse_args()
     state = get_state(args)
-    details = get_stdin_details()
-    report(state, details)
+    if not args.FILE:
+        details = get_stdin_details()
+        if details["error"]:
+            quit(1)
+        report(state, details)
+    else:
+        for path in args.FILE:
+            if path == "-":
+                details = get_stdin_details()
+                if details["error"]:
+                    quit(1)
+                report(state, details)
+            else:
+                details = get_file_details(path)
+                if not details["exists"]:
+                    print(f"No such file or directory: {path}")
+                    continue
+                if not details["is_file"]:
+                    print(f"Is a directory: {path}")
+                    continue
+                if details["error"]:
+                    quit(1)
+                report(state, details, path)
     quit(0)
 
 if __name__ == "__main__":
